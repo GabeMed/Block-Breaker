@@ -31,3 +31,32 @@ const getInitialPaddleAndBall = (width, heigth, paddleWidth) => {
         ball
     }
 }
+
+export const gameStateFromLevel = ({ lives, paddleWidth, speed, blocks}) => {
+    const width = blocks[0].length
+    const heigth = width
+
+    const blockStart = ((heigth - heigth * PADDLE_AREA) - (blocks.length * BLOCK_HEIGHT))/2
+
+    const rowsOfBlocks = blocks.map((row, i) => 
+        row.map((eachBlock, j) => ({
+            eachBlock,
+            position: new Vector(j, blockStart + (i * BLOCK_HEIGHT)),
+            width: 1,
+            heigth: BLOCK_HEIGHT
+        }))
+    )
+
+    const size = {
+        width,
+        heigth
+    }
+
+    return {
+        size,
+        blocks: flatten(rowsOfBlocks),
+        ...getInitialPaddleAndBall(width, heigth, paddleWidth),
+        lives,
+        speed
+    }
+}
