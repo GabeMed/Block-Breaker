@@ -13,15 +13,15 @@ const UP = new Vector(0,-1)
 const LEFT_UP = LEFT.add(UP).normalize()
 const RIGHT_UP = RIGHT.add(UP).normalize()
 
-const getInitialPaddleAndBall = (width, heigth, paddleWidth) => {
-    const paddleY = heigth - PADDLE_HEIGHT
+const getInitialPaddleAndBall = (width, height, paddleWidth) => {
+    const paddleY = height - PADDLE_HEIGHT
     const paddle = {
         position: new Vector(width - paddleWidth/2, paddleY),
         width: paddleWidth,
         height: PADDLE_HEIGHT
     }
     const ball = {
-        center: new Vector(width - BALL_RADIUS/2, heigth - BALL_RADIUS * 2), // ! CHECK HERE the ball initial position after the game is running
+        center: new Vector(width - BALL_RADIUS/2, height - BALL_RADIUS * 2), // ! CHECK HERE the ball initial position after the game is running
         radius: BALL_RADIUS,
         direction: getRandomFrom(LEFT_UP, RIGHT_UP, UP) // ! CHECK THE BEST INITIAL DIRECTIONS AFTER PLAYING
     }
@@ -34,28 +34,28 @@ const getInitialPaddleAndBall = (width, heigth, paddleWidth) => {
 
 export const gameStateFromLevel = ({ lives, paddleWidth, speed, blocks}) => {
     const width = blocks[0].length
-    const heigth = width
+    const height = width
 
-    const blockStart = ((heigth - heigth * PADDLE_AREA) - (blocks.length * BLOCK_HEIGHT))/2
+    const blockStart = ((height - height * PADDLE_AREA) - (blocks.length * BLOCK_HEIGHT))/2
 
     const rowsOfBlocks = blocks.map((row, i) => 
         row.map((eachBlock, j) => ({
             eachBlock,
             position: new Vector(j, blockStart + (i * BLOCK_HEIGHT)),
             width: 1,
-            heigth: BLOCK_HEIGHT
+            height: BLOCK_HEIGHT
         }))
     )
 
     const size = {
         width,
-        heigth
+        height
     }
 
     return {
         size,
         blocks: flatten(rowsOfBlocks),
-        ...getInitialPaddleAndBall(width, heigth, paddleWidth),
+        ...getInitialPaddleAndBall(width, height, paddleWidth),
         lives,
         speed
     }
