@@ -10,7 +10,7 @@ export default ({lives, containerWidth, unit}) => {
             rx={unit/4}
             height={unit}
             width={width}
-            x={containerWidth - unit - width * (i + 1) - (unit / 2) * i}
+            x={containerWidth - unit - width * (i + 1) - (unit / 2) * i} // Just some math to look beautiful !nothing important!
             y={unit}
             key={i}
         />
