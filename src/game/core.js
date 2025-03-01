@@ -6,6 +6,7 @@ const BLOCK_HEIGHT = 1/3
 const PADDLE_HEIGHT = BLOCK_HEIGHT
 const BALL_RADIUS = 1/5
 const DISTANCE_COVERED_IN_1_MILI_SECOND_WITH_SPEED_1 = 0.005
+const BALL_INITIAL_OFFSET = 5
 
 export const MOVEMENT = {
     LEFT: 'LEFT',
@@ -28,7 +29,7 @@ const getInitialPaddleAndBall = (width, height, paddleWidth) => {
         height: PADDLE_HEIGHT
     }
     const ball = {
-        center: new Vector(width/2, height/2 + 5 * BALL_RADIUS), // Just put any value here, run the code and adjust by your preference
+        center: new Vector(width/2, height/2 + BALL_INITIAL_OFFSET * BALL_RADIUS), // Just put any value here, run the code and adjust by your preference
         radius: BALL_RADIUS,
         direction: getRandomFrom(LEFT_UP, RIGHT_UP, UP) // ! CHECK THE BEST INITIAL DIRECTIONS AFTER PLAYING
     }
@@ -43,12 +44,12 @@ export const gameStateFromLevel = ({ lives, paddleWidth, speed, blocks }) => {
     const width = blocks[0].length
     const height = width
 
-    const blockStart = ((height - height * PADDLE_AREA) - (blocks.length * BLOCK_HEIGHT))/2
+    const blockStartY = ((height - height * PADDLE_AREA) - (blocks.length * BLOCK_HEIGHT))/2
 
     const rowsOfBlocks = blocks.map((row, i) => 
         row.map((density, j) => ({
             density,
-            position: new Vector(j, blockStart + (i * BLOCK_HEIGHT)),
+            position: new Vector(j, blockStartY + (i * BLOCK_HEIGHT)),
             width: 1,
             height: BLOCK_HEIGHT
         }))
@@ -74,7 +75,7 @@ const getDistortedDirection = (vector, distortionLevel = 0.1) => {
     return vector.add(distortion).normalize()
 }
 
-const getNewPaddle = (paddle, size, distanceToBeCovered, movement) => {
+const getNewPaddle = (paddle, size, distanceToBeCovered, movement) => {   
     if(!movement) return paddle
     const direction = movement === MOVEMENT.LEFT ? LEFT : RIGHT  
 
@@ -82,7 +83,7 @@ const getNewPaddle = (paddle, size, distanceToBeCovered, movement) => {
     const updateTheValueFromX = x => ({
         ...paddle,
         position: new Vector(x, paddle.position.y)
-    })
+    })                                                                                  
 
     if(x < 0){
         return updateTheValueFromX(0);
@@ -95,30 +96,23 @@ const getNewPaddle = (paddle, size, distanceToBeCovered, movement) => {
     return updateTheValueFromX(x)
 }
 
-const isInBoundaries = (oneSide, otherSide, oneBoundary, otherBoundary) => ( // !A PIECE OF SHIT IN FORM OF CODE NEED TO CHANGE LATER
+const isOverlappingRange = (oneSide, otherSide, oneBoundary, otherBoundary) => ( // !A PIECE OF SHIT IN FORM OF CODE NEED TO CHANGE LATER
     (oneSide >= oneBoundary && oneSide <= otherBoundary) ||
     (otherSide >= oneBoundary && otherSide <= otherBoundary)
 )
 
-const getAdjustedVector = (surfaceNormalDirection, vector, minAngle = 15) => {  // ! ANOTHER SHIT CODE TO CHANGE
-    const angle = surfaceNormalDirection.angleBetween(vector)                   // TODO CREATE A ABSOLUTE VALUE FUNCTION IN UTILS
+const getAdjustedVector = (surfaceNormalDirection, vector, minAngle = 15) => {  
+    const angle = surfaceNormalDirection.angleBetween(vector)                   
     const maxAngle = 90 - minAngle
-    if (angle < 0) {
-      if (angle > -minAngle) {
-        return surfaceNormalDirection.rotate(-minAngle)
-      }
-      if (angle < -maxAngle) {
-        return surfaceNormalDirection.rotate(-maxAngle)
-      }
-    } else {
-      if (angle < minAngle) {
-        return surfaceNormalDirection.rotate(minAngle)
-      }
-      if (angle > maxAngle) {
-        return surfaceNormalDirection.rotate(maxAngle)
-      }
+    const absoluteValueOfAngle = Math.abs(angle)
+
+    if(absoluteValueOfAngle < minAngle){
+        return surfaceNormalDirection.rotate((absoluteValueOfAngle/angle) * minAngle)
     }
-    
+    else if(absoluteValueOfAngle > maxAngle){
+        return surfaceNormalDirection.rotate((absoluteValueOfAngle)/angle * maxAngle)
+    }
+
     return vector
 }
 
@@ -128,8 +122,8 @@ export const getNewGameState = (state, movement, timespan) => {  // ! CHECK FOR 
     const paddle = getNewPaddle(state.paddle, size, distanceCovered, movement)
 
     const { radius } = state.ball
-    const ballInstantDirection = state.ball.direction
-    const newBallCenter = state.ball.center.add(ballInstantDirection.scaleBy(distanceCovered))
+    const currentBallDirection = state.ball.direction
+    const newBallCenter = state.ball.center.add(currentBallDirection.scaleBy(distanceCovered))
     const ballBottom = newBallCenter.y + radius
 
     if(ballBottom >= size.height){
@@ -140,7 +134,7 @@ export const getNewGameState = (state, movement, timespan) => {  // ! CHECK FOR 
           }
     }
 
-    const withNewBallProps = props => ({  // ! THINK OF A BETTER NAME
+    const getUpdatedGameStateWithBall = props => ({  // ! THINK OF A BETTER NAME
         ...state,
         paddle,
         ball: {
@@ -150,9 +144,9 @@ export const getNewGameState = (state, movement, timespan) => {  // ! CHECK FOR 
     })
 
     const withNewBallDirection = surfaceNormalDirection => {
-        const distortion = getDistortedDirection(ballInstantDirection.reflect(surfaceNormalDirection))
+        const distortion = getDistortedDirection(currentBallDirection.reflect(surfaceNormalDirection))
         const direction = getAdjustedVector(surfaceNormalDirection, distortion)
-        return withNewBallProps({direction})
+        return getUpdatedGameStateWithBall({direction})
     }
 
     const ballLeft = newBallCenter.x - radius
@@ -169,29 +163,32 @@ export const getNewGameState = (state, movement, timespan) => {  // ! CHECK FOR 
     if (ballRight >= size.width) return withNewBallDirection(LEFT)
 
     const block = state.blocks.find(({ position, width, height }) => (
-        isInBoundaries(ballTop, ballBottom, position.y, position.y + height) &&    // ! CHANGE NAME AS FAST AS POSSIBLE
-        isInBoundaries(ballLeft, ballRight, position.x, position.x + width)   
+        isOverlappingRange(ballTop, ballBottom, position.y, position.y + height) &&    // ! CHANGE NAME AS FAST AS POSSIBLE
+        isOverlappingRange(ballLeft, ballRight, position.x, position.x + width)   
         ))
         if (block) {
         const density = block.density - 1
         const newBlock = { ...block, density }
         const blocks = density < 0 ? withoutElement(state.blocks, block) : updateElement(state.blocks, block, newBlock)
         
-        const getNewBallNormal = () => {
+        const calculateBallReflectionNormal = () => {
             const blockTop = block.position.y
             const blockBottom = blockTop + block.height
             const blockLeft = block.position.x
-            if (ballTop > blockTop - radius && ballBottom < blockBottom + radius) {
-            if (ballLeft < blockLeft) return LEFT
-            if (ballRight > blockLeft + block.width) return RIGHT
+            
+            if (ballTop >= blockTop - radius && ballBottom <= blockBottom + radius) {
+                if (ballLeft < blockLeft) 
+                    return LEFT
+                if (ballRight > blockLeft + block.width) 
+                    return RIGHT
             }
             if (ballTop > blockTop) return DOWN
             if (ballTop <= blockTop) return UP
         }
         return {
-            ...withNewBallDirection(getNewBallNormal()),
+            ...withNewBallDirection(calculateBallReflectionNormal()),
             blocks
         }
         }
-        return withNewBallProps({ center: newBallCenter })
+        return getUpdatedGameStateWithBall({ center: newBallCenter })
 }

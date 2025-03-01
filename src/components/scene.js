@@ -1,13 +1,66 @@
-import React, { useReducer } from "react";
+import React, { useReducer, useEffect } from "react";
 
 import { LEVELS } from "../game/levels";
-import { gameStateFromLevel } from "../game/core";
+import { gameStateFromLevel, MOVEMENT, getNewGameState } from "../game/core";
 
 import Level from "./level";
 import Lives from "./lives";
 import Block from "./block";
 import Paddle from "./paddle";
 import Ball from "./ball";
+
+const MOVEMENT_KEYS = {
+    LEFT: [65, 37],
+    RIGHT: [68, 39] 
+}
+
+const STOP_KEY = 32
+
+const FPS = 1000 / 60  // 60 re-renders per second 
+
+const ACTION = {
+    CONTAINER_SIZE_CHANGE: 'CONTAINER_SIZE_CHANGE',
+    KEY_DOWN: 'KEY_DOWN',
+    KEY_UP: 'KEY_UP',
+    TICK: 'TICK'
+}
+
+const HANDLER = {
+    [ACTION.CONTAINER_SIZE_CHANGE]: (state, containerSize) => ({
+        ...state,
+        containerSize,
+        ...getProjectors(containerSize, state.gameSize)
+    }),
+
+    [ACTION.KEY_DOWN]: (state, key) => {
+        if(MOVEMENT_KEYS.LEFT.includes(key)){
+            return { ...state, movement: MOVEMENT.LEFT }
+        }
+        else if(MOVEMENT_KEYS.RIGHT.includes(key)){
+            return { ...state, movement: MOVEMENT.RIGHT }
+        }
+        return state
+    },
+
+    [ACTION.KEY_UP]: (state, key) => {
+        const newState = { ...state, movement: undefined }
+
+        if(key !== STOP_KEY) return newState
+
+        if (state.stopTime) return { ...newState, stopTime: undefined, time: state.time + Date.now() - state.stopTime }
+
+        return { ...newState, stopTime: Date.now() }
+    },
+
+    [ACTION.TICK]: state => {
+        if(state.stopTime) return state
+
+        const time = Date.now()
+        const newGame = getNewGameState(state.game, state.movement, time - state.time)
+        const newState = { ...state, time}
+
+    }
+}
 
 const getInitialLevel = () => {
     const inState = localStorage.getItem('level')
