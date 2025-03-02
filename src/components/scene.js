@@ -1,13 +1,15 @@
 import React, { useReducer, useEffect } from "react";
 
 import { LEVELS } from "../game/levels";
-import { gameStateFromLevel, MOVEMENT, getNewGameState } from "../game/core";
+import { gameStateFromLevel, getNewGameState } from "../game/gameState";
+import { MOVEMENT } from "../game/gameConfig";
 
 import Level from "./level";
 import Lives from "./lives";
 import Block from "./block";
 import Paddle from "./paddle";
 import Ball from "./ball";
+import { registerListener } from "../utils";
 
 const MOVEMENT_KEYS = {
     LEFT: [65, 37],
@@ -29,7 +31,7 @@ const HANDLER = {
     [ACTION.CONTAINER_SIZE_CHANGE]: (state, containerSize) => ({
         ...state,
         containerSize,
-        ...getProjectors(containerSize, state.gameSize)
+        ...getProjectors(containerSize, state.size)
     }),
 
     [ACTION.KEY_DOWN]: (state, key) => {
@@ -57,8 +59,23 @@ const HANDLER = {
 
         const time = Date.now()
         const newGame = getNewGameState(state.game, state.movement, time - state.time)
-        const newState = { ...state, time}
+        const newState = { ...state, time }
 
+        if(newGame.lives < 1) return { ...state, game: gameStateFromLevel(LEVELS[state.level])} // ! Check here after the game is done, to understand what changes
+
+        else if(newGame.blocks.length < 1){
+            const level = state.level === LEVELS.length ? state.level : state.level + 1
+            localStorage.setItem('level', level)
+            const game = gameStateFromLevel(LEVELS[level])   // ! Check what changes 
+
+            return {
+                ...newState,
+                level,
+                game,
+                ...getProjectors(state.containerSize, game.size)
+            }
+        }
+        return {...newState, game:newGame}
     }
 }
 
@@ -95,10 +112,11 @@ const getInitialState = containerSize => {
     }
 }
 
-const reducer = state => state
+const reducer = () => reducer  
 
 export default (containerSize) => {
-    const [state] = useReducer(reducer, containerSize, getInitialState)
+    const [state, dispatch] = useReducer(reducer, containerSize, getInitialState)
+    // const act = (type, payload) => dispatch({ type, payload })
     const {
         projectDistance,
         projectVector,
