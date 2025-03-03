@@ -1,6 +1,8 @@
 import Vector from "./vector"
 
-// Here we define some constants that will be used in other places
+import { getRange } from "../utils";
+import { BLOCK_MAX_DENSITY } from "../game/levels";
+
 
 const BLOCK_HEIGHT = 1/3
 const LEFT = new Vector(-1,0)
@@ -29,3 +31,6 @@ export const MOVEMENT = {
     LEFT: 'LEFT',
     RIGHT: 'RIGHT'
 }
+
+
+export const BLOCK_COLORS = getRange(BLOCK_MAX_DENSITY).map(i => `rgba(191, 64, 191, ${1 / (BLOCK_MAX_DENSITY - i)})`)

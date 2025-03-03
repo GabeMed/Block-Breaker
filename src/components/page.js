@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState} from "react";
 import Scene from "./scene";
 import { registerListener } from "../utils";
 
-export default () => {
+const Page = () => {
     const sceneContainer = useRef()
     const [size, setSize] = useState()
 
@@ -21,8 +21,10 @@ export default () => {
     return (
         <div className = 'page'>
             <div className="scene-container" ref={sceneContainer}>
-                {size && <Scene {...size}/>}
+                {size && <Scene containerSize = {size}/>}
             </div>
         </div>
     )
 }
+
+export default Page;
