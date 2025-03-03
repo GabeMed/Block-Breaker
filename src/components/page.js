@@ -21,7 +21,7 @@ const Page = () => {
     return (
         <div className = 'page'>
             <div className="scene-container" ref={sceneContainer}>
-                {size && <Scene containerSize = {size}/>}
+                {size && <Scene {...size}/>}
             </div>
         </div>
     )

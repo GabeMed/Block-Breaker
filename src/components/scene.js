@@ -113,7 +113,7 @@ const HANDLER = {
 
 const reducer = ( state, { type, payload }) => {
     const handler = HANDLER[type]                          // TODO improve here, everytime the type is out of bounds it will give an error
-    if(!handler(type)) return state
+    if(!handler) return state
     
     return handler(state, payload)
 } 
