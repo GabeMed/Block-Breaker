@@ -26,7 +26,7 @@ const getInitialLevel = () => {
     return inState ? parseInt(inState, 10) : 0
 }
 
-const getProjectors = (containerSize, gameSize) => {   
+const getProjectors = (containerSize, gameSize) => { 
     const widthRatio = containerSize.width / gameSize.width    // This get projectors will always reajust the elements so they don't get distorced when the window change 
     const heightRatio = containerSize.height / gameSize.height // every length and distance parameter will be adjusted with this func
     const unitOnScreen = Math.min(widthRatio, heightRatio)
@@ -40,8 +40,9 @@ const getProjectors = (containerSize, gameSize) => {
 const getInitialState = containerSize => {
     const level = getInitialLevel()
     const game = gameStateFromLevel(LEVELS[level])
-    const { projectDistance, projectVector } = getProjectors(containerSize, game.size)
     
+    const { projectDistance, projectVector } = getProjectors(containerSize, game.size)
+
     return {
         level,
         game,
@@ -66,7 +67,7 @@ const HANDLER = {
         {
         ...state,
         containerSize,
-        ...getProjectors(containerSize, state.size)
+        ...getProjectors(containerSize, state.game.size)
     }),
     [ACTION.KEY_DOWN]: (state, key) => {
         if(MOVEMENT_KEYS.LEFT.includes(key)){
@@ -142,7 +143,7 @@ const Scene = (containerSize) => {
         const onKeyDown = ({ which }) => act(ACTION.KEY_DOWN, which)
         const onKeyUp = ({ which }) => act(ACTION.KEY_UP, which)
         const tick = () => act(ACTION.TICK)
-    
+
         const timerId = setInterval(tick, FPS)
         const unregisterKeydown = registerListener('keydown', onKeyDown)
         const unregisterKeyup = registerListener('keyup', onKeyUp)

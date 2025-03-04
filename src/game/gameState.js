@@ -48,6 +48,7 @@ export const gameStateFromLevel = ({ lives, paddleWidth, speed, blocks }) => {
         height
     }
 
+
     return {
         size,
         blocks: flatten(rowsOfBlocks),
@@ -124,6 +125,7 @@ export const getNewGameState = (state, movement, timespan) => {  //TODO IMPROVE 
 
     const ballGoingDown = Math.abs(UP.angleBetween(currentBallDirection)) > 90
     const hitPaddle = ballGoingDown && (ballBottom >= paddleTop) && (ballRight >= paddleLeft) && (ballLeft <= paddleRight)
+
     if (hitPaddle) return withNewBallDirection(UP)
     if (ballTop <= 0) return withNewBallDirection(DOWN)
     if (ballLeft <= 0) return withNewBallDirection(RIGHT)
@@ -135,28 +137,29 @@ export const getNewGameState = (state, movement, timespan) => {  //TODO IMPROVE 
         ))
 
     if (hittedBlock) {
-    const newDensity = hittedBlock.density - 1
-    const newBlock = { ...hittedBlock, newDensity }
-    const newBlocks = newDensity < 0 ? removeElement(state.blocks, hittedBlock) : updateElement(state.blocks, hittedBlock, newBlock)
-    
-    const calculateBallReflectionNormal = () => {
-        const hittedBlockTop = hittedBlock.position.y
-        const hittedBlockBottom = hittedBlockTop + hittedBlock.height
-        const hittedBlockLeft = hittedBlock.position.x
+        const newDensity = hittedBlock.density - 1
+        const newBlock = { ...hittedBlock, density: newDensity }
+        const newBlocks = newDensity < 0 ? removeElement(state.blocks, hittedBlock) : updateElement(state.blocks, hittedBlock, newBlock)
         
-        if (ballTop >= hittedBlockTop - radius && ballBottom <= hittedBlockBottom + radius) {
-            if (ballLeft < hittedBlockLeft) 
-                return LEFT
-            if (ballRight > hittedBlockLeft + hittedBlock.width) 
-                return RIGHT
-        }
-        if (ballTop > hittedBlockTop) return DOWN
-        if (ballTop <= hittedBlockTop) return UP
+        const calculateBallReflectionNormal = () => {
+            const hittedBlockTop = hittedBlock.position.y
+            const hittedBlockBottom = hittedBlockTop + hittedBlock.height
+            const hittedBlockLeft = hittedBlock.position.x
+            
+            if (ballTop >= hittedBlockTop - radius && ballBottom <= hittedBlockBottom + radius) {
+                if (ballLeft < hittedBlockLeft) 
+                    return LEFT
+                if (ballRight > hittedBlockLeft + hittedBlock.width) 
+                    return RIGHT
+            }
+            if (ballTop > hittedBlockTop) return DOWN
+            if (ballTop <= hittedBlockTop) return UP
     }
         return {
             ...withNewBallDirection(calculateBallReflectionNormal()),
-            newBlocks
+            blocks: newBlocks
         }
         }
-        return getUpdatedGameStateWithBall({ center: newBallCenter })
+
+    return getUpdatedGameStateWithBall({ center: newBallCenter })
 }
