@@ -2,7 +2,7 @@ import Vector from "./vector"
 
 // This is where the colision logic is mostly defined 
 
-export const getDistortedDirection = (vector, distortionLevel = 0.2) => {
+export const getDistortedDirection = (vector, distortionLevel = 0.3) => {
     const getComponent = () => Math.random() * distortionLevel - distortionLevel / 2  // ! CHECK AFTER PLAYING TO SEE IF ITS OK 
     const distortion = new Vector(getComponent(), getComponent())
     return vector.add(distortion).normalize()
