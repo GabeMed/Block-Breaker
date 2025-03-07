@@ -99,7 +99,7 @@ const HANDLER = {
         else if(newGame.blocks.length < 1){
             const level = state.level === LEVELS.length ? state.level : state.level + 1
             localStorage.setItem('level', level)
-            const game = gameStateFromLevel(LEVELS[level])   // ! Check what changes 
+            const game = gameStateFromLevel(LEVELS[level])   
 
             return {
                 ...newState,
@@ -113,7 +113,7 @@ const HANDLER = {
 }
 
 const reducer = ( state, { type, payload }) => {
-    const handler = HANDLER[type]                          // TODO improve here, everytime the type is out of bounds it will give an error
+    const handler = HANDLER[type]                         
     if(!handler) return state
     
     return handler(state, payload)
@@ -155,7 +155,7 @@ const Scene = (containerSize) => {
       }, [])
 
     const viewWidth = projectDistance(width)
-    const unit = projectDistance(ball.radius)  // Used to make the art of the life bars 
+    const unit = projectDistance(ball.radius)  // Used to prevent the distortion when resizing the screen
 
     return (
         <svg width={viewWidth} height={projectDistance(height)} className='scene'> 

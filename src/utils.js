@@ -1,3 +1,7 @@
+import { BLOCK_MAX_DENSITY } from "./game/levels"
+
+// Here we define some helper functions that will be used in other files
+
 export const toDegrees = radians => (radians * 180)/Math.PI
 export const toRadians = degree => (Math.PI * degree)/180
 
@@ -11,3 +15,7 @@ export const registerListener = (eventName, handler) => {
     window.addEventListener(eventName, handler)
     return () => window.removeEventListener(eventName, handler)  
 }
+
+export const getRandomBlock = () => Math.floor(Math.random() * BLOCK_MAX_DENSITY)
+export const getBlocks = (rows, columns) => 
+    getRange(rows).map(() => getRange(columns).map(getRandomBlock))

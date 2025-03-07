@@ -85,11 +85,10 @@ const { DISTANCE_COVERED_IN_1_MILI_SECOND_WITH_SPEED_1, DOWN } = GAME_CONFIG
 
 export const getNewGameState = (state, movement, timespan) => {
     const { size, speed, lives, blocks, ball } = state;
-    const { radius } = ball
     const distanceCovered = timespan * DISTANCE_COVERED_IN_1_MILI_SECOND_WITH_SPEED_1 * speed;
     const paddle = getNewPaddle(state.paddle, size, distanceCovered, movement);
     
-    const newBallCenter = ball.center.add(ball.direction.scaleBy(distanceCovered));
+    const newBallCenter = ball.center.add(ball.direction.scaleBy(distanceCovered));  // The new ball position after the displacement 
     const ballBounds = {
         left: newBallCenter.x - ball.radius,
         right: newBallCenter.x + ball.radius,
@@ -111,7 +110,7 @@ export const getNewGameState = (state, movement, timespan) => {
         ball: { ...ball, ...newBallProps }
     });
 
-    const ballGoingDown = Math.abs(UP.angleBetween(ball.direction)) > 90;
+    const ballGoingDown = ball.direction.y > 0;
     const paddleBounds = {
         left: paddle.position.x,
         right: paddle.position.x + paddle.width,
@@ -119,6 +118,8 @@ export const getNewGameState = (state, movement, timespan) => {
         bottom: paddle.position.y + paddle.height  
     };
     
+    const EPSILON = 0.1; // We define it to help us make the side colision with the paddle
+
     const hitPaddleTop = (
         ballGoingDown &&
         ballBounds.bottom >= paddleBounds.top &&
@@ -127,20 +128,18 @@ export const getNewGameState = (state, movement, timespan) => {
     );
 
     const hitPaddleSide = (
-        ballBounds.bottom > paddleBounds.top && ballBounds.top < paddleBounds.bottom && // Está dentro da altura do paddle
+        !hitPaddleTop &&
+        ballBounds.bottom >= paddleBounds.top && 
+        ballBounds.top <= paddleBounds.bottom && 
         (
-            (ballBounds.right === paddleBounds.left) || 
-            (ballBounds.left === paddleBounds.right)  
+            Math.abs(ballBounds.right - paddleBounds.left) <= EPSILON ||   // We use EPSILON because it will not always be exactly side by side
+            Math.abs(ballBounds.left - paddleBounds.right) <= EPSILON
         )
     );
-    
 
-    if (hitPaddleTop){ 
-        console.log("hittedTop!!")
-        return withNewBallDirection(ball.direction, UP, getUpdatedGameStateWithBall)};
-    if (hitPaddleSide) {
-        console.log("hitted!!!")
-        return withNewBallDirection(ball.direction, ballBounds.right === paddleBounds.left ? LEFT : RIGHT, getUpdatedGameStateWithBall)}
+    if (hitPaddleTop) return withNewBallDirection(ball.direction, UP, getUpdatedGameStateWithBall);
+    if (hitPaddleSide) return withNewBallDirection(ball.direction, Math.abs(ballBounds.right - paddleBounds.left) <= EPSILON ? LEFT : RIGHT, getUpdatedGameStateWithBall)
+    
     if (ballBounds.top <= 0) return withNewBallDirection(ball.direction, DOWN, getUpdatedGameStateWithBall);
     if (ballBounds.left <= 0) return withNewBallDirection(ball.direction, RIGHT, getUpdatedGameStateWithBall);
     if (ballBounds.right >= size.width) return withNewBallDirection(ball.direction, LEFT, getUpdatedGameStateWithBall);

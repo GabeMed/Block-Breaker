@@ -3,6 +3,7 @@ import Vector from "./vector"
 import { getRange } from "../utils";
 import { BLOCK_MAX_DENSITY } from "../game/levels";
 
+// Here we define some constants to make the main code look cleaner
 
 const BLOCK_HEIGHT = 1/3
 const LEFT = new Vector(-1,0)

@@ -1,11 +1,8 @@
-import {getRange} from '../utils'
+import { getBlocks } from "../utils"
+
+// Here you can change game configurations and make it harder !!
 
 export const BLOCK_MAX_DENSITY = 3
-
-const getRandomBlock = () => Math.floor(Math.random() * BLOCK_MAX_DENSITY)
-
-const getBlocks = (rows, columns) => 
-    getRange(rows).map(() => getRange(columns).map(getRandomBlock))
 
 export const LEVELS = [
     {

@@ -26,7 +26,7 @@ export default class Vector {
         return new Vector(this.x - x, this.y - y)
     }
 
-    dotProduct({x,y}){  // ! IMPROVE
+    dotProduct({x,y}){  
         return this.x * x + this.y + y
     }
 
@@ -45,12 +45,12 @@ export default class Vector {
         const sin = Math.sin(radians)
 
         return new Vector(
-            this.x * cos - this.y * sin,  // Just apply the rotation matrix  
+            this.x * cos - this.y * sin,  
             this.x * sin + this.y * cos
         )
     }
 
-    crossProduct({x,y}){  // ! IMPROVE
+    crossProduct({x,y}){  
         return this.x * y - this.y * x
     }
 

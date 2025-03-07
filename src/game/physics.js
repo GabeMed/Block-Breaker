@@ -4,7 +4,7 @@ import { GAME_CONFIG } from "./gameConfig"
 // This is where the colision logic is mostly defined 
 
 export const getDistortedDirection = (vector, distortionLevel = 0.3) => {
-    const getComponent = () => Math.random() * distortionLevel - distortionLevel / 2  // ! CHECK AFTER PLAYING TO SEE IF ITS OK 
+    const getComponent = () => Math.random() * distortionLevel - distortionLevel / 2  
     const distortion = new Vector(getComponent(), getComponent())
     return vector.add(distortion).normalize()
 }
