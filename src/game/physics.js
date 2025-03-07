@@ -1,4 +1,5 @@
 import Vector from "./vector"
+import { GAME_CONFIG } from "./gameConfig"
 
 // This is where the colision logic is mostly defined 
 
@@ -27,3 +28,26 @@ export const getAdjustedVector = (surfaceNormalDirection, vector, minAngle = 15)
 
     return vector
 }
+
+const { LEFT, RIGHT, DOWN, UP } = GAME_CONFIG
+
+export const calculateBallReflectionNormal = (hittedBlock, ballBounds, ballRadius) => {
+    const blockBounds = {
+        top: hittedBlock.position.y,
+        bottom: hittedBlock.position.y + hittedBlock.height,
+        left: hittedBlock.position.x,
+        right: hittedBlock.position.x + hittedBlock.width
+    };
+
+    if (ballBounds.top >= blockBounds.top - ballRadius && ballBounds.bottom <= blockBounds.bottom + ballRadius) {
+        if (ballBounds.left < blockBounds.left) return LEFT;
+        if (ballBounds.right > blockBounds.right) return RIGHT;
+    }
+    return (ballBounds.top > blockBounds.top) ? DOWN : UP;
+};
+
+export const withNewBallDirection = (currentBallDirection, surfaceNormalDirection, getUpdatedGameStateWithBall) => {
+    const distortion = getDistortedDirection(currentBallDirection.reflect(surfaceNormalDirection));
+    const newDirection = getAdjustedVector(surfaceNormalDirection, distortion);
+    return getUpdatedGameStateWithBall({ direction: newDirection });
+};

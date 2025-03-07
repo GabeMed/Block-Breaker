@@ -1,6 +1,6 @@
 import Vector from './vector'
 import { flatten, getRandomFrom, removeElement, updateElement } from '../utils'
-import { getDistortedDirection, getAdjustedVector, isGoingToHit } from './physics'
+import { isGoingToHit, withNewBallDirection, calculateBallReflectionNormal } from './physics'
 import { GAME_CONFIG, MOVEMENT } from './gameConfig'
 
 // Here is where we define the main logic of the game
@@ -83,83 +83,67 @@ const getNewPaddle = (paddle, size, distanceToBeCovered, movement) => {
 
 const { DISTANCE_COVERED_IN_1_MILI_SECOND_WITH_SPEED_1, DOWN } = GAME_CONFIG
 
-export const getNewGameState = (state, movement, timespan) => {  //TODO IMPROVE THIS FUNCTION, IT'S VERY DIFICULT TO READ AND MAKE IMPROVEMENTS
-    const { size, speed, lives } = state
-    const distanceCovered = timespan * DISTANCE_COVERED_IN_1_MILI_SECOND_WITH_SPEED_1 * speed
-    const paddle = getNewPaddle(state.paddle, size, distanceCovered, movement)
+export const getNewGameState = (state, movement, timespan) => {
+    const { size, speed, lives, blocks, ball } = state;
+    const distanceCovered = timespan * DISTANCE_COVERED_IN_1_MILI_SECOND_WITH_SPEED_1 * speed;
+    const paddle = getNewPaddle(state.paddle, size, distanceCovered, movement);
+    
+    const newBallCenter = ball.center.add(ball.direction.scaleBy(distanceCovered));
+    const ballBounds = {
+        left: newBallCenter.x - ball.radius,
+        right: newBallCenter.x + ball.radius,
+        top: newBallCenter.y - ball.radius,
+        bottom: newBallCenter.y + ball.radius
+    };
 
-    const { radius } = state.ball
-    const currentBallDirection = state.ball.direction
-    const newBallCenter = state.ball.center.add(currentBallDirection.scaleBy(distanceCovered))
-    const ballBottom = newBallCenter.y + radius
-
-    if(ballBottom >= size.height){
+    if (ballBounds.bottom >= size.height) {
         return {
             ...state,
             ...getInitialPaddleAndBall(size.width, size.height, paddle.width),
             lives: lives - 1
-          }
+        };
     }
 
-    const getUpdatedGameStateWithBall = props => ({  
+    const getUpdatedGameStateWithBall = newBallProps => ({
         ...state,
         paddle,
-        ball: {
-            ...state.ball,
-            ...props
-        }
-    })
+        ball: { ...ball, ...newBallProps }
+    });
 
-    const withNewBallDirection = surfaceNormalDirection => {
-        const distortion = getDistortedDirection(currentBallDirection.reflect(surfaceNormalDirection))
-        const direction = getAdjustedVector(surfaceNormalDirection, distortion)
-        return getUpdatedGameStateWithBall({direction})
-    }
+    const ballGoingDown = Math.abs(UP.angleBetween(ball.direction)) > 90;
+    const paddleBounds = {
+        left: paddle.position.x,
+        right: paddle.position.x + paddle.width,
+        top: paddle.position.y
+    };
+    
+    const hitPaddle = (
+        ballGoingDown &&
+        ballBounds.bottom >= paddleBounds.top &&
+        ballBounds.right >= paddleBounds.left &&
+        ballBounds.left <= paddleBounds.right
+    );
 
-    const ballLeft = newBallCenter.x - radius
-    const ballRight = newBallCenter.x + radius
-    const ballTop = newBallCenter.y - radius
-    const paddleLeft = paddle.position.x
-    const paddleRight = paddleLeft  + paddle.width
-    const paddleTop = paddle.position.y
+    if (hitPaddle) return withNewBallDirection(ball.direction, UP, getUpdatedGameStateWithBall);
+    if (ballBounds.top <= 0) return withNewBallDirection(ball.direction, DOWN, getUpdatedGameStateWithBall);
+    if (ballBounds.left <= 0) return withNewBallDirection(ball.direction, RIGHT, getUpdatedGameStateWithBall);
+    if (ballBounds.right >= size.width) return withNewBallDirection(ball.direction, LEFT, getUpdatedGameStateWithBall);
 
-    const ballGoingDown = Math.abs(UP.angleBetween(currentBallDirection)) > 90
-    const hitPaddle = ballGoingDown && (ballBottom >= paddleTop) && (ballRight >= paddleLeft) && (ballLeft <= paddleRight)
-
-    if (hitPaddle) return withNewBallDirection(UP)
-    if (ballTop <= 0) return withNewBallDirection(DOWN)
-    if (ballLeft <= 0) return withNewBallDirection(RIGHT)
-    if (ballRight >= size.width) return withNewBallDirection(LEFT)
-
-    const hittedBlock = state.blocks.find(({ position, width, height }) => (
-        isGoingToHit(ballTop, ballBottom, position.y, position.y + height) &&   
-        isGoingToHit(ballLeft, ballRight, position.x, position.x + width)   
-        ))
+    const hittedBlock = blocks.find(({ position, width, height }) => (
+        isGoingToHit(ballBounds.top, ballBounds.bottom, position.y, position.y + height) &&
+        isGoingToHit(ballBounds.left, ballBounds.right, position.x, position.x + width)
+    ));
 
     if (hittedBlock) {
-        const newDensity = hittedBlock.density - 1
-        const newBlock = { ...hittedBlock, density: newDensity }
-        const newBlocks = newDensity < 0 ? removeElement(state.blocks, hittedBlock) : updateElement(state.blocks, hittedBlock, newBlock)
-        
-        const calculateBallReflectionNormal = () => {
-            const hittedBlockTop = hittedBlock.position.y
-            const hittedBlockBottom = hittedBlockTop + hittedBlock.height
-            const hittedBlockLeft = hittedBlock.position.x
-            
-            if (ballTop >= hittedBlockTop - radius && ballBottom <= hittedBlockBottom + radius) {
-                if (ballLeft < hittedBlockLeft) 
-                    return LEFT
-                if (ballRight > hittedBlockLeft + hittedBlock.width) 
-                    return RIGHT
-            }
-            if (ballTop > hittedBlockTop) return DOWN
-            if (ballTop <= hittedBlockTop) return UP
-    }
-        return {
-            ...withNewBallDirection(calculateBallReflectionNormal()),
-            blocks: newBlocks
-        }
-        }
+        const newDensity = hittedBlock.density - 1;
+        const newBlock = { ...hittedBlock, density: newDensity };
+        const newBlocks = newDensity < 0 ? removeElement(blocks, hittedBlock) : updateElement(blocks, hittedBlock, newBlock);
 
-    return getUpdatedGameStateWithBall({ center: newBallCenter })
-}
+        return {
+            ...withNewBallDirection(ball.direction, calculateBallReflectionNormal(hittedBlock, ballBounds, ball.radius), getUpdatedGameStateWithBall),
+            blocks: newBlocks
+        };
+    }
+
+    return getUpdatedGameStateWithBall({ center: newBallCenter });
+};
