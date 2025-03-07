@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/Block-Breaker/static/css/main.0909c8f1.css",
-    "main.js": "/Block-Breaker/static/js/main.a626f4aa.js",
+    "main.js": "/Block-Breaker/static/js/main.b560ddc2.js",
     "static/js/453.71d5b66f.chunk.js": "/Block-Breaker/static/js/453.71d5b66f.chunk.js",
     "index.html": "/Block-Breaker/index.html",
     "main.0909c8f1.css.map": "/Block-Breaker/static/css/main.0909c8f1.css.map",
-    "main.a626f4aa.js.map": "/Block-Breaker/static/js/main.a626f4aa.js.map",
+    "main.b560ddc2.js.map": "/Block-Breaker/static/js/main.b560ddc2.js.map",
     "453.71d5b66f.chunk.js.map": "/Block-Breaker/static/js/453.71d5b66f.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.0909c8f1.css",
-    "static/js/main.a626f4aa.js"
+    "static/js/main.b560ddc2.js"
   ]
 }
