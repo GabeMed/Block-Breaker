@@ -17,7 +17,7 @@ const getInitialPaddleAndBall = (width, height, paddleWidth) => {
     const ball = {
         center: new Vector(width/2, height/2 + BALL_INITIAL_OFFSET * BALL_RADIUS), 
         radius: BALL_RADIUS,
-        direction: getRandomFrom(LEFT_UP, RIGHT_UP, UP) // ! CHECK THE BEST INITIAL DIRECTIONS AFTER PLAYING
+        direction: getRandomFrom(LEFT_UP, RIGHT_UP, UP) 
     }
 
     return {
