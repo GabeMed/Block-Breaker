@@ -85,6 +85,7 @@ const { DISTANCE_COVERED_IN_1_MILI_SECOND_WITH_SPEED_1, DOWN } = GAME_CONFIG
 
 export const getNewGameState = (state, movement, timespan) => {
     const { size, speed, lives, blocks, ball } = state;
+    const { radius } = ball
     const distanceCovered = timespan * DISTANCE_COVERED_IN_1_MILI_SECOND_WITH_SPEED_1 * speed;
     const paddle = getNewPaddle(state.paddle, size, distanceCovered, movement);
     
@@ -114,17 +115,32 @@ export const getNewGameState = (state, movement, timespan) => {
     const paddleBounds = {
         left: paddle.position.x,
         right: paddle.position.x + paddle.width,
-        top: paddle.position.y
+        top: paddle.position.y,
+        bottom: paddle.position.y + paddle.height  
     };
     
-    const hitPaddle = (
+    const hitPaddleTop = (
         ballGoingDown &&
         ballBounds.bottom >= paddleBounds.top &&
         ballBounds.right >= paddleBounds.left &&
         ballBounds.left <= paddleBounds.right
     );
 
-    if (hitPaddle) return withNewBallDirection(ball.direction, UP, getUpdatedGameStateWithBall);
+    const hitPaddleSide = (
+        ballBounds.bottom > paddleBounds.top && ballBounds.top < paddleBounds.bottom && // Está dentro da altura do paddle
+        (
+            (ballBounds.right === paddleBounds.left) || 
+            (ballBounds.left === paddleBounds.right)  
+        )
+    );
+    
+
+    if (hitPaddleTop){ 
+        console.log("hittedTop!!")
+        return withNewBallDirection(ball.direction, UP, getUpdatedGameStateWithBall)};
+    if (hitPaddleSide) {
+        console.log("hitted!!!")
+        return withNewBallDirection(ball.direction, ballBounds.right === paddleBounds.left ? LEFT : RIGHT, getUpdatedGameStateWithBall)}
     if (ballBounds.top <= 0) return withNewBallDirection(ball.direction, DOWN, getUpdatedGameStateWithBall);
     if (ballBounds.left <= 0) return withNewBallDirection(ball.direction, RIGHT, getUpdatedGameStateWithBall);
     if (ballBounds.right >= size.width) return withNewBallDirection(ball.direction, LEFT, getUpdatedGameStateWithBall);
