@@ -1,30 +1,29 @@
-import React, { useRef, useEffect, useState} from "react";
+import React, { useRef, useEffect, useState } from "react";
 
 import Scene from "./scene";
 import { registerListener } from "../utils";
 
 const Page = () => {
-    const sceneContainer = useRef()
-    const [size, setSize] = useState()
+  const sceneContainer = useRef();
+  const [size, setSize] = useState();
 
-    useEffect(() => {
-        const onResize = () => {
-            const {width, height} = sceneContainer.current.getBoundingClientRect()
-            setSize({width, height})
-        }
-        const unregisterResizeListener = registerListener('resize', onResize)
-        onResize()
-        return unregisterResizeListener
-    },[])
+  useEffect(() => {
+    const onResize = () => {
+      const { width, height } = sceneContainer.current.getBoundingClientRect();
+      setSize({ width, height });
+    };
+    const unregisterResizeListener = registerListener("resize", onResize);
+    onResize();
+    return unregisterResizeListener;
+  }, []);
 
-
-    return (
-        <div className = 'page'>
-            <div className="scene-container" ref={sceneContainer}>
-                {size && <Scene {...size}/>}
-            </div>
-        </div>
-    )
-}
+  return (
+    <div className="page">
+      <div className="scene-container" ref={sceneContainer}>
+        {size && <Scene {...size} />}
+      </div>
+    </div>
+  );
+};
 
 export default Page;
