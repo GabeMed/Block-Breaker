@@ -1,52 +1,66 @@
 # 🎮 Block Breaker Game
 
-Um jogo estilo Breakout desenvolvido em React, utilizando física simples para movimentação e colisão.
+A Breakout-style game developed in React, using simple physics for movement and collision.
 
-## 🚀 Demonstração
+### 🚀 Demo
 
-🔗 **Jogue aqui:** https://gabemed.github.io/Block-Breaker/
+🔗 Play here: https://gabemed.github.io/Block-Breaker/
 
-## 📜 Sobre o Projeto
+### 📜 About the Project
 
-Este projeto recria o clássico jogo Breakout, onde o jogador controla uma plataforma para rebater a bola e quebrar blocos. O jogo mantém o progresso do jogador entre os níveis.
+This project recreates the classic Breakout game, where the player controls a paddle to bounce the ball and break blocks. The game saves the player's progress between levels.
+### 🛠️ Technologies Used
 
-## 🛠️ Tecnologias Utilizadas
+* React
 
-- React
-- JavaScript 
-- HTML & CSS
+* JavaScript
 
-## 📥 Como Rodar Localmente
+* SVG
 
-1. Clone este repositório:
-   ```bash
-   git clone https://github.com/seu-usuario/seu-repositorio.git
-   ```
-2. Entre na pasta do projeto:
-   ```bash
-   cd nome-do-projeto
-   ```
-3. Instale as dependências:
-   ```bash
-   npm install
-   ```
-4. Inicie o servidor de desenvolvimento:
-   ```bash
-   npm start
-   ```
-5. Acesse no navegador:
-   ```
-   http://localhost:3000
-   ```
+* HTML & CSS
 
-## 🛠️ Funcionalidades
+### 📥 How to Run Locally
 
-- Controle do paddle via teclado
-- Detecção de colisões
-- Mudança de níveis
-- Salvamento do progresso do jogador
+1. Clone this repository:
 
-## 📄 Licença
+```
+git clone https://github.com/your-username/your-repository.git 
+```
 
-Este projeto está sob a licença MIT. Sinta-se livre para usá-lo e modificá-lo!
+2. Enter the project folder:
 
+```
+cd project-name
+```
+
+3. Install the dependencies:
+
+```
+npm install
+```
+
+4. Start the development server:
+
+```
+npm start
+```
+
+5. Open in your browser:
+
+```
+http://localhost:3000
+```
+
+### 🛠️ Features
+
+* Paddle control via keyboard
+
+* Collision detection
+
+* Level transitions
+
+* Player progress saving
+
+### 📄 License
+
+This project is licensed under the *MIT License*. Feel free to use and modify it!
